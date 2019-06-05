@@ -12,11 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 def _member_by_user(url, login, pw, user):
-    member_id = None
+    member_id = '__invalid_user_id__'
     members = fetch_members(url, login, pw)
     member_data = [x for x in members['members'] if x['accountName'] == user]
-    if len(member_data) > 0:
+    if len(member_data) == 1:
         member_id = member_data[0]['memberId']
+    elif len(member_data) == 0:
+        logger.warning("No user found")
+    else:
+        logger.warning("More than one user found. This should not be possible")
     return member_id
 
 
@@ -39,7 +43,8 @@ def fetch_members(url, login, pw, user=None):
     data = dict(accountName=login,
                 credential=base64.b64encode(pw))
     if user is not None:
-        data['memberId'] = _member_by_user(url, login, pw, user)
+        member_id = _member_by_user(url, login, pw, user)
+        data['memberId'] = member_id
 
     headers = {'Content-type': 'application/json',
                'Accept': 'application/json'}

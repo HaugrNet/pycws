@@ -19,9 +19,9 @@ def test_fetch_members():
 
 def test_invite_delete_member():
 
-    # Currently not possible due to https://github.com/JavaDogs/cws/issues/55
-    # data = pycws.fetch_members(URL, 'admin', 'admin', 'test_user')
-    # assert len(data['members']) == 0
+    data = pycws.fetch_members(URL, 'admin', 'admin', 'test_user')
+    assert len(data['members']) == 0
+    assert data["returnCode"] == 406
 
     data = pycws.invite_member(URL, 'admin', 'admin', 'test_user')
     assert data["returnCode"] == 200
@@ -38,6 +38,10 @@ def test_invite_delete_member():
     # Clean up again
     data = pycws.delete_member(URL, 'admin', 'admin', 'test_user')
     assert data["returnCode"] == 200
+
+    data = pycws.fetch_members(URL, 'admin', 'admin', 'test_user')
+    assert len(data['members']) == 0
+    assert data["returnCode"] == 406
 
 
 ''' A user has been informed that he can now upgrade her profile to support
