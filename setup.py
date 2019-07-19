@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pycws',
-      version='0.1',
+      version='0.2.dev0',
       description='A python api to cws',
       url='http://github.com/javadogs/pycws',
       author='Alexander Pilz',
