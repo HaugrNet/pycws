@@ -24,12 +24,12 @@ def _member_by_user(url, login, pw, user):
     return member_id
 
 
-def invite_member(url, login, pw, user):
-    logger.info('Invite member %s' % user)
-    endpoint = urlparse.urljoin(url, 'members/inviteMember')
-    data = dict(accountName=login,
-                credential=base64.b64encode(pw),
-                newAccountName=user)
+def _post(url, login, pw, action, data={}):
+    logger.info('Posting to %s' % action)
+    endpoint = urlparse.urljoin(url, action)
+    data.update(dict(accountName=login,
+                     credential=base64.b64encode(pw))
+                )
     headers = {'Content-type': 'application/json',
                'Accept': 'application/json'}
     response = requests.post(endpoint, data=json.dumps(data), headers=headers)
@@ -37,34 +37,100 @@ def invite_member(url, login, pw, user):
     return json.loads(response.text)
 
 
+def invite_member(url, login, pw, user):
+    data = dict(newAccountName=user)
+    return _post(url, login, pw, 'members/inviteMember', data)
+
+
+def create_member(url, login, pw, user, user_pw):
+    data = dict(newAccountName=user,
+                newCredential=base64.b64encode(user_pw))
+    response = _post(url, login, pw, 'members/createMember', data)
+    return response
+
+
 def fetch_members(url, login, pw, user=None):
-    logger.info('Fetch members')
-    endpoint = urlparse.urljoin(url, 'members/fetchMembers')
-    data = dict(accountName=login,
-                credential=base64.b64encode(pw))
+    data = {}
+
     if user is not None:
         member_id = _member_by_user(url, login, pw, user)
         data['memberId'] = member_id
 
-    headers = {'Content-type': 'application/json',
-               'Accept': 'application/json'}
-    response = requests.post(endpoint, data=json.dumps(data), headers=headers)
-    logger.info(response.text)
-    return json.loads(response.text)
+    return _post(url, login, pw, 'members/fetchMembers', data)
 
 
 def delete_member(url, login, pw, user):
-    logger.info('Delete member %s' % user)
-    # temporary workaround until cws 1.2
-    # need to resolve memberId by accountName
     member_id = _member_by_user(url, login, pw, user)
+    data = dict(memberId=member_id)
+    return _post(url, login, pw, 'members/deleteMember', data)
 
-    endpoint = urlparse.urljoin(url, 'members/deleteMember')
-    data = dict(accountName=login,
-                credential=base64.b64encode(pw),
-                memberId=member_id)
-    headers = {'Content-type': 'application/json',
-               'Accept': 'application/json'}
-    response = requests.post(endpoint, data=json.dumps(data), headers=headers)
-    logger.info(response.text)
-    return json.loads(response.text)
+
+def create_circle(url, login, pw, circle_name):
+    data = dict(circleName=circle_name)
+    response = _post(url, login, pw, 'circles/createCircle', data)
+    return response
+
+
+def fetch_circles(url, login, pw):
+    response = _post(url, login, pw, 'circles/fetchCircles')
+    return response
+
+
+def get_circle_id_by_name(url, login, pw, circle_name):
+    circles = fetch_circles(url, login, pw)['circles']
+    circle = [x for x in circles if x['circleName'] == circle_name]
+    if len(circle) == 1:
+        return circle[0]['circleId']
+    logger.error(
+        'More than once circle with the same name "%s". '
+        'This should not happen.' % circle_name)
+    raise Exception
+
+
+def delete_circle(url, login, pw, circle_id):
+    data = dict(circleId=circle_id)
+    response = _post(url, login, pw, 'circles/deleteCircle', data)
+    return response
+
+
+def add_trustee(url, login, pw, circle_id, user, trust_level='READ'):
+    data = dict(circleId=circle_id,
+                memberId=user,
+                trustLevel=trust_level)
+    response = _post(url, login, pw, 'trustees/addTrustee', data)
+    return response
+
+
+def alter_trustee(url, login, pw, circle_name, user, trust_level='READ'):
+    data = dict(circleName=circle_name,
+                memberId=user,
+                trustLevel=trust_level)
+    response = _post(url, login, pw, 'trustees/alterTrustee', data)
+    return response
+
+
+def remove_trustee(url, login, pw, circle_name, user):
+    data = dict(circleName=circle_name,
+                memberId=user)
+    response = _post(url, login, pw, 'trustees/removeTrustee', data)
+    return response
+
+
+def add_file(url, login, pw, circle_id, blob, uid):
+    data = dict(circleId=circle_id,
+                dataName=uid,
+                data=base64.b64encode(blob))
+    response = _post(url, login, pw, 'data/addData', data)
+    return response
+
+
+def fetch_file(url, login, pw, data_id):
+    data = dict(dataId=data_id)
+    response = _post(url, login, pw, 'data/fetchData', data)
+    return response
+
+
+def delete_file(url, login, pw, data_id):
+    data = dict(dataId=data_id)
+    response = _post(url, login, pw, 'data/deleteData', data)
+    return response
