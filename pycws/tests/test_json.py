@@ -3,7 +3,7 @@
 import pycws
 import base64
 
-URL = "http://cws.quaivecloud.com/cws/"
+URL = "http://localhost:8080/cws/"
 
 ''' The admin accesses the system and prepares a user to support encryption.
 To do so, a temporary certificate is generated, saved to cws and passed to the
