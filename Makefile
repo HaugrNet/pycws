@@ -31,5 +31,5 @@ github/cws:
 
 github/cws/accessories/release/bin/wildfly.sh: SHELL:=/bin/bash
 github/cws/accessories/release/bin/wildfly.sh: github/cws
-	source env.sh && cd github/cws && mvn clean install -Dmaven.javadoc.skip=true
+	source env.sh && cd github/cws && mvn clean install -DskipTests -Dmaven.javadoc.skip=true
 	touch github/cws/accessories/release/bin/wildfly.sh
