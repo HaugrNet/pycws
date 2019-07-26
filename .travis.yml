@@ -1,0 +1,30 @@
+language: python
+
+dist: xenial
+
+sudo: true
+
+python:
+    - "2.7"
+
+#    - "3.6"
+#    - "3.7"
+
+services:
+    - postgresql
+
+before_install:
+  - sudo chmod ugo+w /etc/postgresql/9.6/main/pg_hba.conf
+  - sudo echo -e "local all all trust\nhost all all 0.0.0.0/0 trust" > /etc/postgresql/9.6/main/pg_hba.conf
+  - sudo /etc/init.d/postgresql restart
+
+before_script:
+    - make && psql --file github/cws/accessories/release/postgresql/01-install.sql -U postgres
+    - source env.sh && wildfly.sh start && sleep 30 && wildfly.sh configure && wildfly.sh deploy
+
+script:
+    - pytest
+
+cache:
+  directories:
+    - downloads
