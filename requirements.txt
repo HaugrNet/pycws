@@ -1,3 +1,5 @@
-zeep
+black
 pytest
 requests
+six
+zeep
