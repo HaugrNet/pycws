@@ -1,12 +1,13 @@
 # module
 # from zeep import Client. # needed for SOAP
+from __future__ import absolute_import
 import requests
 import json
 
 # import hashlib
 # import datetime
 import base64
-import urlparse
+import six.moves.urllib.parse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,7 +28,7 @@ def _member_by_user(url, login, pw, user):
 
 def _post(url, login, pw, action, data={}):
     logger.info("Posting to %s" % action)
-    endpoint = urlparse.urljoin(url, action)
+    endpoint = six.moves.urllib.parse.urljoin(url, action)
     data.update(dict(accountName=login, credential=base64.b64encode(pw)))
     headers = {"Content-type": "application/json", "Accept": "application/json"}
     response = requests.post(endpoint, data=json.dumps(data), headers=headers)
