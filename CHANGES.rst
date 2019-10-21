@@ -1,7 +1,7 @@
 Changelog for pycws
 ===================
 
-0.2 (unreleased)
+0.2 (2019-10-21)
 ----------------
 
 - python3 compatibility
