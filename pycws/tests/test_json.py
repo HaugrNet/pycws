@@ -3,7 +3,8 @@
 import pycws
 import base64
 
-URL = "http://localhost:8080/cws/"
+URL = "http://localhost:2222/cws/api/"
+# URL = "http://cws.quaivecloud.com/cws/api/"
 
 """ The admin accesses the system and prepares a user to support encryption.
 To do so, a temporary certificate is generated, saved to cws and passed to the
@@ -66,15 +67,17 @@ def test_store_retrieve_file():
     data = pycws.create_circle(URL, "admin", "admin", circle_name)
     circle_id = data.get("circleId")
     if not circle_id:
-        circle_id = pycws.get_circle_id_by_name(URL, "admin", "admin", circle_name)
+        circle_id = pycws.get_circle_id_by_name(
+            URL, "admin", "admin", circle_name)
     # assert data["returnCode"] == 200
     # assert circle_id is not None
 
-    data = pycws.add_trustee(URL, "admin", "admin", circle_id, user_id, "WRITE")
+    data = pycws.add_trustee(URL, "admin", "admin",
+                             circle_id, user_id, "WRITE")
     # assert data["returnCode"] == 200
 
     # ... upload file
-    blob = "ABC"
+    blob = b"ABC"
     uid = "123"
     data = pycws.add_file(URL, "admin", "admin", circle_id, blob, uid)
     assert data["returnCode"] == 200

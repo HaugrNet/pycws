@@ -1,14 +1,11 @@
 # module
-# from zeep import Client. # needed for SOAP
 from __future__ import absolute_import
 import requests
 import json
 
-# import hashlib
-# import datetime
-import base64
 import six.moves.urllib.parse
 import logging
+from pycws.utils import b64encode
 
 logger = logging.getLogger(__name__)
 
@@ -29,8 +26,10 @@ def _member_by_user(url, login, pw, user):
 def _post(url, login, pw, action, data={}):
     logger.info("Posting to %s" % action)
     endpoint = six.moves.urllib.parse.urljoin(url, action)
-    data.update(dict(accountName=login, credential=base64.b64encode(pw)))
-    headers = {"Content-type": "application/json", "Accept": "application/json"}
+
+    data.update(dict(accountName=login, credential=b64encode(pw)))
+    headers = {"Content-type": "application/json",
+               "Accept": "application/json"}
     response = requests.post(endpoint, data=json.dumps(data), headers=headers)
     logger.info(response.text)
     return json.loads(response.text)
@@ -42,7 +41,7 @@ def invite_member(url, login, pw, user):
 
 
 def create_member(url, login, pw, user, user_pw):
-    data = dict(newAccountName=user, newCredential=base64.b64encode(user_pw))
+    data = dict(newAccountName=user, newCredential=b64encode(user_pw))
     response = _post(url, login, pw, "members/createMember", data)
     return response
 
@@ -111,7 +110,7 @@ def remove_trustee(url, login, pw, circle_name, user):
 
 
 def add_file(url, login, pw, circle_id, blob, uid):
-    data = dict(circleId=circle_id, dataName=uid, data=base64.b64encode(blob))
+    data = dict(circleId=circle_id, dataName=uid, data=b64encode(blob))
     response = _post(url, login, pw, "data/addData", data)
     return response
 
